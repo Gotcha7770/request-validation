@@ -2,30 +2,22 @@
 
 public class Result<T> : Either<T, Error>
 {
-    public Result(T left) : base(left)
-    {
-    }
+    public Result(T value) : base(value) { }
 
-    public Result(Error right) : base(right)
-    {
-    }
+    public Result(Error error) : base(error) { }
     
-    public static implicit operator Result<T>(T left) => new Result<T>(left);
+    public static implicit operator Result<T>(T value) => new Result<T>(value);
 
-    public static implicit operator Result<T>(Error right) => new Result<T>(right);
+    public static implicit operator Result<T>(Error error) => new Result<T>(error);
 }
 
 public class Result : Result<Unit>
 {
-    public Result() : base(Unit.Value)
-    {
-    }
+    public Result() : base(Unit.Value) { }
 
-    public Result(Error right) : base(right)
-    {
-    }
+    public Result(Error error) : base(error) { }
 
     public static Result Ok { get; } = new Result();
     
-    public static implicit operator Result(Error right) => new Result(right);
+    public static implicit operator Result(Error error) => new Result(error);
 }

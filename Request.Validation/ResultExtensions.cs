@@ -10,24 +10,39 @@ public static class ResultExtensions
         private static Result<T> Error(Error error) => error;
     }
     
-    public static Result<R> Select<T, R>(this Result<T> item, Func<T, R> selector)
+    public static Result<R> Select<T, R>(this Result<T> source, Func<T, R> selector)
     {
-        return item.Match(x => selector(x), ErrorFunc<R>.Value);
+        return source.Match(x => selector(x), ErrorFunc<R>.Value);
     }
     
-    public static Result<R> SelectMany<T, R>(this Result<T> item, Func<T, Result<R>> selector)
+    public static Result<R> SelectMany<T, R>(this Result<T> source, Func<T, Result<R>> selector)
     {
-        return item.Match(selector, ErrorFunc<R>.Value);
+        return source.Match(selector, ErrorFunc<R>.Value);
+    }
+    
+    public static IAsyncResult<R> SelectMany<T, R>(this Result<T> source, Func<T, IAsyncResult<R>> selector)
+    {
+        return source.Match(selector, AsyncResult.Fail<R>);
     }
     
     public static Result<R2> SelectMany<T, R1, R2>(
-        this Result<T> item,
+        this Result<T> source,
         Func<T, Result<R1>> selector,
         Func<T, R1, R2> resultSelector)
     {
-        return item.Match(
-            x => selector(x).Match(y => resultSelector(x, y), ErrorFunc<R2>.Value),
+        return source.Match(
+            x => selector(x).Select(y => resultSelector(x, y)),
             ErrorFunc<R2>.Value);
+    }
+
+    public static IAsyncResult<R2> SelectMany<T, R1, R2>(
+        this Result<T> source,
+        Func<T, IAsyncResult<R1>> selector,
+        Func<T, R1, R2> resultSelector)
+    {
+        return source.Match(
+            x => selector(x).Select(y => resultSelector(x, y)),
+            AsyncResult.Fail<R2>);
     }
 
     //public static Result<T> AsResult<T>(this T item) => item is null ? new Error("Item not found") : item;

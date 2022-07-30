@@ -30,9 +30,11 @@ public class ChargeCardCommandHandler : IRequestHandler<ChargeCardCommand, Resul
             .FirstOrDefaultAsync(x => x.Id == request.UserId, cancellationToken)
             .AsResult();
 
-        return from user in lookup
-               from canPay in _businessRuleFactory.For(user).CardIsValid()
-               from charge in _billingService.ChargeCard(user.CreditCard, request.Amount)
-               select charge;
+        var result = from user in lookup
+                     from canPay in _businessRuleFactory.For(user).CardIsValid()
+                     from charge in _billingService.ChargeCardAsync(user.CreditCard, request.Amount)
+                     select charge;
+
+        return await result.AsTask();
     }
 }
