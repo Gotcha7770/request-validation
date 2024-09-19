@@ -1,8 +1,7 @@
 ﻿namespace Result.Flow.Result;
 
-public class Error
+public record Error(string Message)
 {
-    public string Message { get; }
-
-    public Error(string message) => Message = message;
+    internal static readonly Error Default = new(string.Empty);
+    public bool IsDefault => Equals(Default);
 }

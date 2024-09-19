@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Result.Flow.AsyncResult;
 using Result.Flow.BusinessRules;
 using Result.Flow.Interfaces;
 using Result.Flow.Persistence;
@@ -34,7 +35,8 @@ public class ChargeCardCommandHandler : IRequestHandler<ChargeCardCommand, Resul
         return await from user in lookup
                      from card in _businessRuleFactory.For(user).HasCard()
                      from isValid in _businessRuleFactory.For(user).CardIsValid()
-                     from charge in _billingService.ChargeCardAsync(user.CreditCard, request.Amount)
-                     select charge;
+                     from charge1 in _billingService.ChargeCardAsync(user.CreditCard, request.Amount)
+                     from charge2 in _billingService.ChargeCardAsync(user.CreditCard, request.Amount)
+                     select charge2;
     }
 }

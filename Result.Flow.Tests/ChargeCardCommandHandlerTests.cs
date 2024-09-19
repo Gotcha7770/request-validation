@@ -42,7 +42,7 @@ public class ChargeCardCommandHandlerTests : IClassFixture<TestFixture>
 
         var result = await handler.Handle(command, CancellationToken.None);
         
-        result.ShouldBeFail();
+        result.Should().BeFail();
     }
     
     [Fact]
@@ -58,14 +58,14 @@ public class ChargeCardCommandHandlerTests : IClassFixture<TestFixture>
             _businessRuleFactory);
 
         var result = await handler.Handle(command, CancellationToken.None);
-        result.ShouldBeFail("User Can not pay");
+        result.Should().BeFail("User Can not pay");
     }
     
     [Fact]
     public async Task BillingException_ReturnsFail()
     {
         _userBusinessRule.CardIsValid()
-            .Returns(Result.Result.Ok);
+            .Returns(Unit.Value);
 
         _billingService.ChargeCard(Arg.Any<CreditCard>(), Arg.Any<decimal>())
             .Returns(new Error("Card payment could not be made"));
@@ -80,14 +80,14 @@ public class ChargeCardCommandHandlerTests : IClassFixture<TestFixture>
             _businessRuleFactory);
 
         var result = await handler.Handle(command, CancellationToken.None);
-        result.ShouldBeFail("Card payment could not be made");
+        result.Should().BeFail("Card payment could not be made");
     }
     
     [Fact]
     public async Task CorrectPath_ReturnsOk()
     {
         _userBusinessRule.CardIsValid()
-            .Returns(Result.Result.Ok);
+            .Returns(Unit.Value);
 
         _billingService.ChargeCard(Arg.Any<CreditCard>(), Arg.Any<decimal>())
             .Returns(_transactionId);
@@ -102,6 +102,6 @@ public class ChargeCardCommandHandlerTests : IClassFixture<TestFixture>
             _businessRuleFactory);
 
         var result = await handler.Handle(command, CancellationToken.None);
-        result.ShouldBeOk(_transactionId);
+        result.Should().BeOk(_transactionId);
     }
 }

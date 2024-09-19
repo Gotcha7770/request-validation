@@ -1,23 +1,43 @@
 ﻿namespace Result.Flow.Result;
 
-public class Result<T> : Either<T, Error>
+public readonly struct Result<T>
 {
-    public Result(T value) : base(value) { }
+    private readonly T _value;
+    private readonly Error _error = Error.Default;
 
-    public Result(Error error) : base(error) { }
+    public bool IsSuccess { get; }
+
+    public Result(T value)
+    {
+        _value = value;
+        _error = default;
+        IsSuccess = true;
+    }
+
+    public Result(Error error)
+    {
+        _value = default;
+        _error = error;
+        IsSuccess = false;
+    }
+
+    public void Match(Action<T> valueHandler, Action<Error> errorHandler)
+    {
+        if (IsSuccess)
+            valueHandler(_value);
+        else
+            errorHandler(_error);
+    }
+
+    public TR Match<TR>(Func<T, TR> valueHandler, Func<Error, TR> errorHandler) => IsSuccess
+        ? valueHandler(_value)
+        : errorHandler(_error);
+
+    public static implicit operator Result<T>(T value) => new(value);
+
+    public static implicit operator Result<T>(Error error) => new(error);
     
-    public static implicit operator Result<T>(T value) => new Result<T>(value);
-
-    public static implicit operator Result<T>(Error error) => new Result<T>(error);
-}
-
-public class Result : Result<Unit>
-{
-    public Result() : base(Unit.Value) { }
-
-    public Result(Error error) : base(error) { }
-
-    public static Result Ok { get; } = new Result();
+    public static Result<T> Ok(T value) => new(value);
     
-    public static implicit operator Result(Error error) => new Result(error);
+    public static Result<T> Fail(Error error) => new(error);
 }

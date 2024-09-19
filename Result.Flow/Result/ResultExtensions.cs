@@ -4,28 +4,21 @@ using Result.Flow.Interfaces;
 
 namespace Result.Flow.Result;
 
-public static class ResultExtensions
+public static partial class ResultExtensions
 {
-    internal static class ErrorFunc<T>
-    {
-        internal static readonly Func<Error, Result<T>> Value = Error;
-
-        private static Result<T> Error(Error error) => error;
-    }
-    
     public static Result<R> Select<T, R>(this Result<T> source, Func<T, R> selector)
     {
-        return source.Match(x => selector(x), ErrorFunc<R>.Value);
+        return source.Match(x => selector(x), Result<R>.Fail);
     }
     
     public static Result<R> SelectMany<T, R>(this Result<T> source, Func<T, Result<R>> selector)
     {
-        return source.Match(selector, ErrorFunc<R>.Value);
+        return source.Match(selector, Result<R>.Fail);
     }
     
-    public static IAsyncResult<R> SelectMany<T, R>(this Result<T> source, Func<T, IAsyncResult<R>> selector)
+    public static AsyncResult<R> SelectMany<T, R>(this Result<T> source, Func<T, AsyncResult<R>> selector)
     {
-        return source.Match(selector, AsyncResult.AsyncResult.Fail<R>);
+        return source.Match(selector, AsyncResult<R>.Fail);
     }
     
     public static Result<R2> SelectMany<T, R1, R2>(
@@ -35,17 +28,17 @@ public static class ResultExtensions
     {
         return source.Match(
             x => selector(x).Select(y => resultSelector(x, y)),
-            ErrorFunc<R2>.Value);
+            Result<R2>.Fail);
     }
 
-    public static IAsyncResult<R2> SelectMany<T, R1, R2>(
+    public static AsyncResult<R2> SelectMany<T, R1, R2>(
         this Result<T> source,
-        Func<T, IAsyncResult<R1>> selector,
+        Func<T, AsyncResult<R1>> selector,
         Func<T, R1, R2> resultSelector)
     {
         return source.Match(
             x => selector(x).Select(y => resultSelector(x, y)),
-            AsyncResult.AsyncResult.Fail<R2>);
+            AsyncResult<R2>.Fail);
     }
 
     //public static Result<T> AsResult<T>(this T item) => item is null ? new Error("Item not found") : item;

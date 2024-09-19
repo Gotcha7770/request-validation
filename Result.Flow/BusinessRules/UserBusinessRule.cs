@@ -22,7 +22,7 @@ public class UserBusinessRule : IUserBusinessRule
     public Result<Unit> CardIsNotExpired()
     {
         return _user.CreditCard.Expiry > DateOnly.FromDateTime(DateTime.Now.Date) 
-            ? Result.Result.Ok 
+            ? Unit.Value 
             : new Error("Card expired");
     }
 
